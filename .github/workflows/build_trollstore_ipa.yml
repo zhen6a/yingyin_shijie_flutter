@@ -1,0 +1,36 @@
+name: 构建 TrollStore IPA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build_ipa:
+    runs-on: macos-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+
+      - name: 安装依赖
+        run: flutter pub get
+
+      - name: 生成 iOS 工程
+        run: flutter build ios --no-codesign
+
+      - name: 打包 TrollStore IPA
+        run: |
+          mkdir -p build/Payload
+          cp -R build/ios/iphoneos/Runner.app build/Payload/
+          cd build
+          zip -r 影音视界-TrollStore-3.6.9.ipa Payload
+
+      - name: 上传 IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: 影音视界-TrollStore-IPA
+          path: build/影音视界-TrollStore-3.6.9.ipa
